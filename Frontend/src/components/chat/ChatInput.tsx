@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button } from '@/components/ui/button';
+import Button from '../ui/Button';
 import { PaperclipIcon, SendIcon } from 'lucide-react';
 import { TypewriterInput } from '@/components/ui/TypewriterPlaceholder'; // adjust path if needed
 
