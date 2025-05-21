@@ -1,0 +1,37 @@
+services:
+  weaviate:
+    image: cr.weaviate.io/semitechnologies/weaviate:1.30.3
+    command:
+      - --host
+      - 0.0.0.0
+      - --port
+      - '8080'
+      - --scheme
+      - http
+    ports:
+      - "8080:8080"
+      - "50051:50051"
+    volumes:
+      - weaviate_data:/var/lib/weaviate
+    restart: on-failure:0
+    environment:
+      QUERY_DEFAULTS_LIMIT: 25
+      AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: 'false'
+
+  qdrant:
+    image: qdrant/qdrant
+    ports:
+      - "6333:6333"
+    volumes:
+      - qdrant_data:/qdrant/storage
+
+  redis:
+    image: redis:8.0.1
+    container_name: redis
+    ports:
+      - "6379:6379"
+    restart: always
+
+volumes:
+  weaviate_data:
+  qdrant_data:

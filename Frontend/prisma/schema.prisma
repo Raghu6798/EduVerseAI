@@ -1,0 +1,87 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model auth_users {
+  id         String       @id @default(uuid())
+  videos     videos[]
+  documents  documents[]
+  images     images[]
+  document_qa document_qa[]
+  image_qa   image_qa[]
+}
+
+model videos {
+  id           String             @id @default(uuid())
+  user_id      String
+  url          String
+  response_text String?
+  message      String?
+  uploaded_at  DateTime?
+  video_timestamps video_timestamps[]
+
+  user         auth_users        @relation(fields: [user_id], references: [id])
+}
+
+model video_timestamps {
+  id           String     @id @default(uuid())
+  video_id     String
+  timestamp    String
+  start_seconds Int
+  embed_url    String
+
+  video        videos     @relation(fields: [video_id], references: [id])
+}
+
+model documents {
+  id           String       @id @default(uuid())
+  user_id      String
+  page_count   Int?
+  uploaded_at  DateTime?
+  file_path    String
+
+  user         auth_users   @relation(fields: [user_id], references: [id])
+  document_qa  document_qa[]
+}
+
+model document_qa {
+  id           String      @id @default(uuid())
+  user_id      String
+  document_id  String
+  question     String
+  answer       String?
+  context      String?
+  created_at   DateTime?
+
+  user         auth_users  @relation(fields: [user_id], references: [id])
+  document     documents   @relation(fields: [document_id], references: [id])
+}
+
+model images {
+  id           String      @id @default(uuid())
+  user_id      String
+  description  String
+  message      String?
+  uploaded_at  DateTime?
+
+  user         auth_users  @relation(fields: [user_id], references: [id])
+  image_qa     image_qa[]
+}
+
+model image_qa {
+  id           String      @id @default(uuid())
+  user_id      String
+  image_id     String
+  question     String
+  answer       String?
+  context      String?
+  created_at   DateTime?
+
+  user         auth_users  @relation(fields: [user_id], references: [id])
+  image        images      @relation(fields: [image_id], references: [id])
+}

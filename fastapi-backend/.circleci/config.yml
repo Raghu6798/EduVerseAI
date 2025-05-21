@@ -1,0 +1,175 @@
+version: 2.1
+
+orbs:
+  python: circleci/python@2.1.1
+  aws-cli: circleci/aws-cli@3.1
+
+executors:
+  python-executor:
+    docker:
+      - image: cimg/python:3.11
+    resource_class: medium
+
+jobs:
+  setup-and-lint:
+    executor: python-executor
+    steps:
+      - checkout
+      
+      # Setup Python and dependencies
+      - python/install-packages:
+          pkg-manager: pip
+          packages:
+            - uv
+      
+      # Setup virtual environment and install dependencies
+      - run:
+          name: Install dependencies with uv
+          command: |
+            python -m pip install --upgrade pip
+            python -m pip install uv
+            uv venv
+            . .venv/bin/activate
+            uv pip install -e ".[dev]" || uv pip install -e .
+      
+      # Cache dependencies
+      - save_cache:
+          key: deps-{{ checksum "pyproject.toml" }}-{{ checksum "uv.lock" }}
+          paths:
+            - .venv
+      
+      # Run linters
+      - run:
+          name: Run code quality checks
+          command: |
+            . .venv/bin/activate
+            ruff check .
+            black --check .
+            isort --check --profile black .
+
+  test:
+    executor: python-executor
+    steps:
+      - checkout
+      
+      # Restore cached dependencies
+      - restore_cache:
+          keys:
+            - deps-{{ checksum "pyproject.toml" }}-{{ checksum "uv.lock" }}
+      
+      # Setup environment if cache missed
+      - run:
+          name: Setup environment if needed
+          command: |
+            if [ ! -d ".venv" ]; then
+              python -m pip install uv
+              uv venv
+              . .venv/bin/activate
+              uv pip install -e ".[dev]" || uv pip install -e .
+            fi
+      
+      # Create .env file for tests if needed
+      - run:
+          name: Setup test environment
+          command: |
+            if [ ! -f ".env" ]; then
+              echo "Creating sample .env file for testing"
+              touch .env
+              # Add necessary environment variables for tests
+              echo "ENVIRONMENT=test" >> .env
+              # Add placeholder values for required API keys
+              echo "WEAVIATE_URL=http://localhost:8080" >> .env
+              echo "QDRANT_URL=http://localhost:6333" >> .env
+            fi
+      
+      # Run tests
+      - run:
+          name: Run tests
+          command: |
+            . .venv/bin/activate
+            python -m pytest tests/ -v
+      
+      # Store test results
+      - store_test_results:
+          path: test-results
+
+  build-docker:
+    executor: python-executor
+    steps:
+      - checkout
+      - setup_remote_docker:
+          version: 20.10.14
+      
+      # Build Docker image
+      - run:
+          name: Build Docker image
+          command: |
+            docker build -t mult_modal_rag:${CIRCLE_SHA1} .
+      
+      # Save Docker image to artifacts
+      - run:
+          name: Save Docker image
+          command: |
+            docker save mult_modal_rag:${CIRCLE_SHA1} | gzip > mult_modal_rag.tar.gz
+      
+      - store_artifacts:
+          path: mult_modal_rag.tar.gz
+          destination: docker-image
+
+  deploy-to-aws:
+    executor: python-executor
+    steps:
+      - checkout
+      - aws-cli/setup:
+          profile-name: default
+      - setup_remote_docker:
+          version: 20.10.14
+      
+      # Build the Docker image again (or could use a more complex workflow to pass it between jobs)
+      - run:
+          name: Build Docker image for deployment
+          command: |
+            docker build -t mult_modal_rag:${CIRCLE_SHA1} .
+      
+      # Push to ECR
+      - run:
+          name: Push to Amazon ECR
+          command: |
+            aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
+            docker tag mult_modal_rag:${CIRCLE_SHA1} ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/mult_modal_rag:${CIRCLE_SHA1}
+            docker tag mult_modal_rag:${CIRCLE_SHA1} ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/mult_modal_rag:latest
+            docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/mult_modal_rag:${CIRCLE_SHA1}
+            docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/mult_modal_rag:latest
+      
+      # Update Lambda function
+      - run:
+          name: Update Lambda function
+          command: |
+            aws lambda update-function-code \
+              --function-name mult_modal_rag \
+              --image-uri ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/mult_modal_rag:${CIRCLE_SHA1}
+
+workflows:
+  version: 2
+  build-test-deploy:
+    jobs:
+      - setup-and-lint
+      - test:
+          requires:
+            - setup-and-lint
+      - build-docker:
+          requires:
+            - test
+      - approve-deployment:
+          type: approval
+          requires:
+            - build-docker
+          filters:
+            branches:
+              only: main
+      - deploy-to-aws:
+          requires:
+            - approve-deployment
+          filters:
+            branches:
+              only: main

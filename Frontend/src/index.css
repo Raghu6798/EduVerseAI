@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Chat interface styles */
+.chat-message-user {
+    @apply bg-indigo-600 text-white rounded-br-none;
+}
+
+.chat-message-assistant {
+    @apply bg-gray-200 text-gray-800 rounded-bl-none;
+}
+
+/* Smooth transitions */
+.message-enter {
+    opacity: 0;
+    transform: translateY(10px);
+}
+
+.message-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 300ms, transform 300ms;
+}

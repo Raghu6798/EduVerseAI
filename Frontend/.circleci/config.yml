@@ -1,0 +1,100 @@
+version: 2.1
+
+executors:
+  python-executor:
+    docker:
+      - image: cimg/python:3.11
+    working_directory: ~/repo
+
+jobs:
+  install:
+    executor: python-executor
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-pydeps-{{ checksum "requirements.txt" }}
+            - v1-pydeps-
+      - run:
+          name: Install dependencies
+          command: |
+            python -m venv venv
+            . venv/bin/activate
+            pip install --upgrade pip
+            pip install -r requirements.txt
+      - save_cache:
+          paths:
+            - ./venv
+          key: v1-pydeps-{{ checksum "requirements.txt" }}
+
+  lint:
+    executor: python-executor
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-pydeps-{{ checksum "requirements.txt" }}
+      - run:
+          name: Lint with flake8
+          command: |
+            . venv/bin/activate
+            pip install flake8
+            flake8 app  # Change 'app' to your FastAPI app directory
+
+  test:
+    executor: python-executor
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-pydeps-{{ checksum "requirements.txt" }}
+      - run:
+          name: Run tests
+          command: |
+            . venv/bin/activate
+            pip install pytest
+            pytest
+
+  # Optional: Build Docker image (if you deploy with Docker)
+  docker_build:
+    docker:
+      - image: cimg/python:3.11
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Build Docker image
+          command: |
+            docker build -t my-fastapi-app:latest .
+
+  deploy:
+    docker:
+      - image: cimg/python:3.11
+    steps:
+      - checkout
+      - run:
+          name: Deploy to production
+          command: |
+            echo "Add your deployment script here (e.g., SSH, Docker push, etc.)"
+
+workflows:
+  version: 2
+  build_and_deploy:
+    jobs:
+      - install
+      - lint:
+          requires:
+            - install
+      - test:
+          requires:
+            - lint
+      # Uncomment the next two lines if you want to build and deploy Docker images
+      # - docker_build:
+      #     requires:
+      #       - test
+      - deploy:
+          requires:
+            - test
+          filters:
+            branches:
+              only: main

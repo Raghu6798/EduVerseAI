@@ -1,0 +1,37 @@
+[project]
+name = "fastapi-backend"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "asyncio>=3.4.3",
+    "cohere>=5.15.0",
+    "langchain-cohere>=0.4.4",
+    "langchain>=0.3.25",
+    "langchain-cerebras>=0.5.0",
+    "langchain-community>=0.3.23",
+    "langchain-google-genai>=2.1.4",
+    "langchain-huggingface>=0.1.2",
+    "langchain-mistralai>=0.2.10",
+    "loguru>=0.7.3",
+    "pylate>=1.0.0",
+    "pytest>=8.3.5",
+    "python-dotenv>=1.1.0",
+    "qdrant-client>=1.14.2",
+    "sentence-transformers>=4.1.0",
+    "weaviate-client>=4.14.1",
+    "ruff>=0.11.8",
+    "black>=25.1.0",
+    "isort>=6.0.1",
+    "supabase>=2.15.1",
+    "mem0ai>=0.1.99",
+    "litellm>=1.70.0",
+    "mcp>=1.9.0",
+    "fastapi>=0.115.12",
+    "uvicorn>=0.34.2",
+    "faiss-cpu>=1.11.0",
+    "google-genai>=1.15.0",
+    "pymupdf>=1.25.5",
+    "pypdf2>=3.0.1",
+]
