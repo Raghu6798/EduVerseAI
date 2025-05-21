@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 const messages = [
-"Ask me to summarize a complex research paper...",
+  "Ask me to summarize a complex research paper...",
 "Need help explaining a tough concept? Just ask...",
 "Request an outline for your upcoming essay...",
 "Curious about a topic? Let me clarify it for you...",
@@ -9,7 +9,8 @@ const messages = [
 "Quiz me on important terms from your notes...",
 "Ask for examples to deepen your understanding...",
 "Let’s explore interdisciplinary connections...",
-"Request a detailed explanation or analogy..."
+"Request a detailed explanation or analogy...",
+"Ask DOCA to generate questions for exam prep..."
 ];
 
 interface TypewriterInputProps {

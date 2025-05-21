@@ -3,7 +3,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { cn } from '@/lib/utils';
 import { Message } from './ChatInterface';
-import { TypewriterPlaceholder } from '../ui/TypewriterPlaceholder';
+import { TypewriterInput } from '../ui/TypewriterPlaceholder';
 
 
 export const ChatMessage = ({ message }: { message: Message }) => {
