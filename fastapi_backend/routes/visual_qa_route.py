@@ -116,6 +116,7 @@ async def get_current_user(request: Request):
         raise HTTPException(status_code=401, detail="Missing or invalid Authorization header")
     jwt_token = auth_header.split(" ")[1]
     user_response = supabase.auth.get_user(jwt_token)
+    print(user_response)
     logger.info(f"The user response is : {user_response}")
     if user_response.user is None:
         raise HTTPException(status_code=401, detail="Invalid or expired token")
@@ -127,9 +128,9 @@ async def upload_image(
     file: UploadFile = File(None),
     url: Optional[str] = None,
     description: Optional[str] = None,
-    message: Optional[str] = None
+    message: Optional[str] = None,
+    user=Depends(get_current_user)
 ):
-    user = await get_current_user(request)
     logger.info(f"Received image upload request from user {user.id}. File: {file.filename if file else 'None'}, URL: {url if url else 'None'}")
     
     if not file and not url:

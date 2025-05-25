@@ -12,13 +12,13 @@ export const Footer: React.FC = () => {
           <div className="col-span-1 md:col-span-1">
             <Link to="/" className="flex items-center gap-2 text-xl font-bold text-slate-900 dark:text-white mb-4">
               <GraduationCap className="h-6 w-6 text-purple-600" />
-              <span>Scholar<span className="text-purple-600">AI</span></span>
+              <span><span className="text-purple-600">Edu</span>Verse</span>
             </Link>
             <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
               Your AI-powered academic assistant that revolutionizes the way students learn.
             </p>
             <div className="flex space-x-4">
-              <a href="https://github.com/Raghu6798/ScholarAI/tree/main" className="text-slate-500 hover:text-purple-600 dark:text-slate-400 dark:hover:text-purple-400">
+              <a href="https://github.com/Raghu6798/Eduverse/tree/main" className="text-slate-500 hover:text-purple-600 dark:text-slate-400 dark:hover:text-purple-400">
                 <Github size={20} />
               </a>
               <a href="#" className="text-slate-500 hover:text-purple-600 dark:text-slate-400 dark:hover:text-purple-400">
@@ -110,7 +110,7 @@ export const Footer: React.FC = () => {
         </div>
         <div className="mt-8 pt-8 border-t border-slate-200 dark:border-slate-800 flex flex-col md:flex-row justify-between items-center">
           <p className="text-sm text-slate-600 dark:text-slate-400">
-            &copy; {currentYear} ScholarAI. All rights reserved.
+            &copy; {currentYear} Eduverse. All rights reserved.
           </p>
           <div className="mt-4 md:mt-0 flex space-x-6">
             <Link to="/privacy" className="text-sm text-slate-600 hover:text-purple-600 dark:text-slate-400 dark:hover:text-purple-400">

@@ -117,7 +117,7 @@ export const Navbar: React.FC = () => {
         <Link to="/" className="flex items-center gap-2 text-xl font-bold text-slate-900 dark:text-white">
           <GraduationCap className="h-6 w-6 text-purple-600" />
           <span>
-            Scholar<span className="text-purple-600">AI</span>
+            <span className="text-purple-600">Edu</span>Verse
           </span>
         </Link>
 

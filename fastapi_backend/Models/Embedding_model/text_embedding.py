@@ -1,15 +1,57 @@
-import sys
+from langchain.embeddings.base import Embeddings
+from typing import List
+from pydantic import SecretStr
+from langchain_core.utils.utils import secret_from_env
+import google.generativeai as genai
+from langchain_huggingface import HuggingFaceEmbeddings
 import os
 
-# Add the root folder to sys.path
-current_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir = os.path.dirname(os.path.dirname(os.path.dirname(current_dir)))
-sys.path.append(root_dir)
+from dotenv import load_dotenv
+load_dotenv()
 
-from fastapi_backend.config.settings import settings
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
+class GeminiEmbeddings(Embeddings):
+    """
+    Google Gemini Embeddings using the Generative AI SDK.
+    """
 
-gem_embed = GoogleGenerativeAIEmbeddings(
-    model="models/gemini-embedding-exp",
-    google_api_key=settings.GOOGLE_API_KEY,
+    def __init__(self, model: str = "models/embedding-001", api_key: SecretStr = None):
+        self.model = model
+        self.api_key = api_key or SecretStr(os.getenv("GOOGLE_API_KEY")
+        )
+        if not self.api_key:
+            raise ValueError("Missing Google API Key. Please set GOOGLE_API_KEY.")
+        
+        genai.configure(api_key=self.api_key.get_secret_value())
+        self.client = genai
+
+    def embed_documents(self, texts: List[str]) -> List[List[float]]:
+        """
+        Embed a list of texts/documents.
+        """
+        embeddings = []
+        for text in texts:
+            res = self.client.embed_content(
+                model=self.model,
+                content=text,
+                task_type="retrieval_document"
+            )
+            embeddings.append(res["embedding"])
+        return embeddings
+
+    def embed_query(self, text: str) -> List[float]:
+        """
+        Embed a single query string.
+        """
+        res = self.client.embed_content(
+            model=self.model,
+            content=text,
+            task_type="retrieval_query"
+        )
+        return res["embedding"]
+
+gemini_embed = GeminiEmbeddings()
+bi_embed = HuggingFaceEmbeddings(   
+    model_name="roberta-base-nli-stsb-mean-tokens",
+    model_kwargs={"device": "cpu"}
 )
+

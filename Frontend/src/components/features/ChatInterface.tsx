@@ -7,7 +7,7 @@ import { useAuth } from "../../context/AuthContext"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import { PaperclipIcon, SendIcon } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import Button from "../ui/Button"
 import { ChatMessage } from "../chat/ChatMessage"
 import { WelcomeMessage } from "../chat/WelcomeMessage"
 import { FileUploadButton } from "../chat/FileUploadButton"
@@ -116,7 +116,7 @@ export const ChatInterface = ({ mode }: { mode: string }) => {
       // ✅ Get the session token
       const token = supabaseSession?.access_token
 
-      const response = await axios.post("http://127.0.0.1:8000/document-qa/upload", formData, {
+      const response = await axios.post("http://localhost:8000/api/v1/upload", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${token}`, // ✅ Add token here
@@ -174,7 +174,7 @@ export const ChatInterface = ({ mode }: { mode: string }) => {
       const token = supabaseSession?.access_token // ✅ Get token
 
       const response = await axios.post(
-        "http://127.0.0.1:8000/document-qa/ask",
+        "http://localhost:8000/api/v1/ask",
         {
           question: input,
           document_id: documentId,
@@ -381,7 +381,7 @@ export const ChatInterface = ({ mode }: { mode: string }) => {
     const videoSource = videoId ? `https://www.youtube.com/embed/${videoId}` : null
 
     return (
-      <div className="flex flex-col h-[80vh] max-w-4xl mx-auto bg-[#1A1F2C] rounded-lg shadow-lg overflow-hidden">
+      <div className="flex flex-col h-[70vh] max-w-4xl mx-auto bg-[#1A1F2C] rounded-lg shadow-lg overflow-hidden">
         <ChatHeader title="Video AI Assistant" subtitle="Process a YouTube video or upload your own" mode="video" />
 
         {videoSource && !videoFile && (
@@ -461,13 +461,17 @@ export const ChatInterface = ({ mode }: { mode: string }) => {
 
           <div className="p-4 bg-[#2D2A33] border-[#3E3D43] border rounded shadow-sm min-h-[150px] text-white">
             {videoResponse ? (
-              <ReactMarkdown remarkPlugins={[remarkGfm]} className="prose prose-invert max-w-none">
-                {videoResponse}
-              </ReactMarkdown>
+              <div className="prose prose-invert max-w-none">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {videoResponse}
+                </ReactMarkdown>
+              </div>
             ) : videoMessage ? (
-              <ReactMarkdown remarkPlugins={[remarkGfm]} className="prose prose-invert max-w-none">
-                {videoMessage}
-              </ReactMarkdown>
+              <div className="prose prose-invert max-w-none">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {videoMessage}
+                </ReactMarkdown>
+              </div>
             ) : (
               <p className="text-gray-400">Results will appear here.</p>
             )}
@@ -570,7 +574,7 @@ export const ChatInterface = ({ mode }: { mode: string }) => {
 
   // Default document mode
   return (
-    <div className="flex flex-col h-[80vh] max-w-4xl mx-auto bg-[#1A1F2C] rounded-lg shadow-lg overflow-hidden">
+    <div className="flex flex-col h-[80vh] max-w-6xl mx-auto bg-[#1A1F2C] rounded-lg shadow-lg overflow-hidden">
       <ChatHeader 
         title="Document Q&A Assistant" 
         subtitle={documentId ? "Document loaded - Ask anything about it" : "Upload a PDF document to begin"}
@@ -583,7 +587,8 @@ export const ChatInterface = ({ mode }: { mode: string }) => {
         ) : (
           <div className="space-y-4">
             {messages.map((message) => (
-              <ChatMessage key={message.id} message={message} />
+
+<ChatMessage key={message.id} message={message} isDocumentUploaded={documentId !== null} />
             ))}
             {(isLoading || isUploading) && (
               <div className="flex justify-start">

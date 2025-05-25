@@ -11,7 +11,7 @@ const testimonials = [
     image:
       "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
     quote:
-      "ScholarAI helped me understand complex algorithms from my lecture recordings that I was struggling with for weeks.",
+      "Eduverse helped me understand complex algorithms from my lecture recordings that I was struggling with for weeks.",
     stars: 5,
   },
   {
@@ -38,7 +38,7 @@ const testimonials = [
     image:
       "https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
     quote:
-      "ScholarAI has transformed how I study for anatomy exams by helping me visualize and understand complex systems.",
+      "Eduverse has transformed how I study for anatomy exams by helping me visualize and understand complex systems.",
     stars: 5,
   },
 ]
@@ -52,7 +52,7 @@ const TestimonialsSection: React.FC = () => {
             What Students Are Saying
           </h2>
           <p className="text-lg text-slate-600 dark:text-slate-400">
-            Don't just take our word for it. See how ScholarAI is helping students achieve their academic goals.
+            Don't just take our word for it. See how Eduverse is helping students achieve their academic goals.
           </p>
         </div>
 

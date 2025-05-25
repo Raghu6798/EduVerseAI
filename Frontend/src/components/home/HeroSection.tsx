@@ -49,7 +49,7 @@ const HeroSection: React.FC = () => {
             <div className="relative rounded-xl overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-700">
               <img 
                 src="https://media.istockphoto.com/id/1757344400/photo/smiling-college-student-writing-during-a-class-at-the-university.jpg?s=612x612&w=0&k=20&c=_o2ZaJedvI0VfuH2rjGjMpYqXlBm_0BUv9Qxy2tHqK0="
-                alt="Student using ScholarAI" 
+                alt="Student using Eduverse" 
                 className="w-full h-auto object-cover min-h-[400px] md:min-h-[500px]" 
                 style={{ width: '100%', maxWidth: 'none' }}
               />

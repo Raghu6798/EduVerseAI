@@ -1,19 +1,24 @@
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { PaperclipIcon, SendIcon } from 'lucide-react';
-import { TypewriterInput } from '@/components/ui/TypewriterPlaceholder'; // adjust path if needed
+"use client"
+
+import type React from "react"
+import { useState } from "react"
+import { Button } from "../../components/ui/button"
+import { PaperclipIcon, SendIcon } from "lucide-react"
+import { TypewriterEffectCycle } from "../../components/ui/TypewriterPlaceholder"
 
 interface ChatInputProps {
-  input: string;
-  setInput: React.Dispatch<React.SetStateAction<string>>;
-  handleSubmit: (e: React.FormEvent) => Promise<void>;
-  isLoading: boolean;
-  documentId: string | null;
-  fileInputRef: React.RefObject<HTMLInputElement>;
-  handleFileChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  file: File | null;
-  validateAndUpload: () => Promise<void>;
-  isUploading: boolean;
+  input: string
+  setInput: React.Dispatch<React.SetStateAction<string>>
+  handleSubmit: (e: React.FormEvent) => Promise<void>
+  isLoading: boolean
+  documentId?: string | null
+  fileInputRef?: React.RefObject<HTMLInputElement>
+  handleFileChange?: (event: React.ChangeEvent<HTMLInputElement>) => void
+  file?: File | null
+  validateAndUpload?: () => Promise<void>
+  isUploading?: boolean
+  mode?: "document" | "image" | "video"
+  allowChatWithoutFile?: boolean
 }
 
 export const ChatInput = ({
@@ -26,53 +31,95 @@ export const ChatInput = ({
   handleFileChange,
   file,
   validateAndUpload,
-  isUploading
+  isUploading,
+  mode = "document",
+  allowChatWithoutFile = false,
 }: ChatInputProps) => {
+  const [isTypewriterActive, setIsTypewriterActive] = useState(true)
+
+  const canSubmit = () => {
+    if (allowChatWithoutFile) {
+      return input.trim() && !isLoading
+    }
+    return input.trim() && !isLoading && (documentId || mode !== "document")
+  }
+
+  const handleInputFocus = () => {
+    setIsTypewriterActive(false)
+  }
+
+  const handleInputBlur = () => {
+    if (!input.trim()) {
+      setIsTypewriterActive(true)
+    }
+  }
+
   return (
     <div className="border-t border-[#3E3D43] p-4 bg-[#2D2A33]">
       <form onSubmit={handleSubmit} className="flex gap-2 items-center">
-        <input 
-          type="file" 
-          ref={fileInputRef} 
-          onChange={handleFileChange} 
-          accept=".pdf" 
-          className="hidden" 
-        />
-        <button
-          type="button"
-          onClick={() => fileInputRef.current?.click()}
-          className="p-2 rounded-full text-gray-300 hover:bg-[#3E3D43] transition-colors"
-          title="Attach document"
-          disabled={isUploading}
-        >
-          <PaperclipIcon className="h-5 w-5" />
-        </button>
-        
-        {file && !documentId && (
-          <Button 
-            onClick={validateAndUpload} 
-            disabled={isUploading} 
+        {/* File upload button - only show for document mode or when file handling is provided */}
+        {(mode === "document" || fileInputRef) && (
+          <>
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              accept={mode === "document" ? ".pdf" : mode === "image" ? "image/*" : ".mp4,.mov,.avi,.mkv"}
+              className="hidden"
+            />
+            <button
+              type="button"
+              onClick={() => fileInputRef?.current?.click()}
+              className="p-2 rounded-full text-gray-300 hover:bg-[#3E3D43] transition-colors"
+              title={`Attach ${mode}`}
+              disabled={isUploading}
+            >
+              <PaperclipIcon className="h-5 w-5" />
+            </button>
+          </>
+        )}
+
+        {/* Upload button - only show when file is selected but not uploaded */}
+        {file && !documentId && validateAndUpload && (
+          <Button
+            onClick={validateAndUpload}
+            disabled={isUploading}
             className="flex items-center gap-2 bg-[#7E69AB] hover:bg-[#9b87f5] text-white"
           >
             {isUploading ? "Uploading..." : "Upload"}
           </Button>
         )}
 
-        <TypewriterInput
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          className="flex-1 bg-[#333333] text-white border border-[#3E3D43] rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#9b87f5] placeholder-gray-500"
-          disabled={!documentId || isLoading}
-        />
-        
+        {/* Input field with typewriter effect */}
+        <div className="flex-1 relative bg-[#333333] border border-[#3E3D43] rounded-full px-4 py-2 focus-within:ring-2 focus-within:ring-[#9b87f5]">
+          <TypewriterEffectCycle
+            mode={mode}
+            isActive={isTypewriterActive}
+            value={input}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setInput(e.target.value)}
+            onFocus={handleInputFocus}
+            onBlur={handleInputBlur}
+            disabled={isLoading}
+            className="text-white placeholder-gray-500"
+          />
+        </div>
+
+        {/* Send button */}
         <Button
           type="submit"
-          disabled={!input.trim() || isLoading || !documentId}
+          disabled={!canSubmit()}
           className="rounded-full p-2 bg-[#7E69AB] text-white hover:bg-[#9b87f5] disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <SendIcon className="h-5 w-5" />
         </Button>
       </form>
+
+      {/* Helper text */}
+      {!allowChatWithoutFile && !documentId && mode === "document" && (
+        <p className="text-xs text-gray-400 mt-2 px-2">
+          Upload a document to start chatting, or enable general chat mode
+        </p>
+      )}
     </div>
-  );
-};
+  )
+}

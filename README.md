@@ -1,127 +1,168 @@
-# ScholarAI 
+# Multimodal RAG Application
 
-[![MIT License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)]()
+## Project Description
 
-ScholarAI is a modern SaaS platform that leverages advanced AI and LLMs to help students and educators interact with academic content in new ways. Upload textbooks, lecture notes, images, or videos and get contextual, AI-powered answers and study support.
+This project is a Multimodal Retrieval Augmented Generation (RAG) application designed to interact with various types of learning materials, including documents, images, videos, and audio. It leverages a FastAPI backend for processing and an AI/React frontend for the user interface, providing a smart study companion.
 
----
+## Features
 
-## 🚀 Core Functionality
+- **Document Analysis:** Upload PDFs and other documents to ask specific questions and get contextual answers.
+- **Image Understanding:** Analyze diagrams, charts, and handwritten notes.
+- **Video & Audio Processing:** Extract insights and ask questions from lecture recordings and notes.
+- **Conversational Interface:** Interact with your learning materials through a chat interface.
+- **Multimodal RAG:** Combines Large Language Models (LLMs) with retrieval from diverse data types.
+- **User Authentication:** Secure access to uploaded materials.
 
-- **Document Q&A:** Upload PDFs and ask questions about their content. ScholarAI retrieves relevant context and provides accurate, cited answers.
-- **Image Q&A:** Upload images (e.g., diagrams, charts) or provide image URLs. Ask questions about the image content and get detailed, AI-generated explanations.
-- **Video Q&A:** Upload lecture videos or provide YouTube links. ScholarAI transcribes, processes, and enables Q&A over the video content.
-- **Contextual Retrieval:** Uses vector search and embeddings to find the most relevant content for your queries.
-- **User Authentication:** Secure login and access control via Supabase.
-- **Modern UI:** Responsive, animated frontend with beautiful backgrounds and smooth user experience.
+## Technologies Used
 
----
+### Frontend (Frontend/)
 
-## 🛠️ Tech Stack
+- React
+- Vite
+- TypeScript
+- react-router-dom
+- ai/react (for chat functionality)
+- Tailwind CSS (inferred from class names)
+- framer-motion (for animations)
 
-### Frontend
+### Backend (fastapi_backend/)
 
-- **React 18** with **TypeScript**
-- **Vite** for fast development and builds
-- **Tailwind CSS** for utility-first styling
-- **Framer Motion** for smooth animations
-- **Lucide React** for icons
-- **Supabase JS** for authentication and user management
+- FastAPI
+- Python
+- Langchain
+- Qdrant (Vector Database)
+- Supabase (Authentication and Metadata Storage)
+- loguru (Logging)
+- python-dotenv (Environment variable management)
+- PyMuPDFLoader, RecursiveCharacterTextSplitter, HuggingFaceEmbeddings (from Langchain ecosystem)
 
-### Backend
-
-- **FastAPI** (Python) for high-performance APIs
-- **LangChain** for LLM orchestration and chaining
-- **Sentence Transformers** for embeddings
-- **FAISS** for vector search
-- **Qdrant** and **Weaviate** (optional) for scalable vector storage
-- **Python-dotenv** for environment management
-
----
-
-## 🤖 LLM & AI Providers
-
-- **Groq (Llama 70B):** Used for document and video Q&A via `langchain-groq`.
-- **Google Gemini (Gemini 2.0 Flash):** Used for image Q&A via `langchain-google-genai`.
-- **HuggingFace Transformers:** Used for text and image embeddings.
-- **Whisper:** Used for video/audio transcription.
-
----
-
-## 📦 Key Dependencies
-
-### Frontend
-
-- `react`, `react-dom`, `react-router-dom`
-- `framer-motion`
-- `tailwindcss`
-- `@supabase/supabase-js`
-- `lucide-react`
-
-### Backend
-
-- `fastapi`
-- `langchain`, `langchain-huggingface`, `langchain-google-genai`, `langchain-groq`
-- `sentence-transformers`
-- `faiss`
-- `qdrant-client`, `weaviate-client`
-- `python-dotenv`
-- `whisper` (for video/audio)
-
----
-
-## 🏗️ Project Structure
+## Project Structure
 
 ```
-/Frontend
-  - src/
-    - components/
-    - pages/
-    - App.tsx
-    - main.tsx
-  - package.json
-  - tailwind.config.js
-
-/fastapi-backend
-  - main.py
-  - routes/
-    - document_qa_route.py
-    - visual_qa_route.py
-    - video_qa_route.py
-  - Models/
-  - requirements.txt
+.
+├── Frontend/
+│   ├── src/
+│   │   ├── components/     # Reusable UI components
+│   │   │   ├── auth/
+│   │   │   ├── home/
+│   │   │   ├── layout/
+│   │   │   └── ui/         # Generic UI elements (Button, etc.)
+│   │   ├── context/        # React contexts (AuthContext)
+│   │   ├── pages/          # Main application pages (Home, DocumentChat, etc.)
+│   │   └── ...             # Other frontend files (index.css, main.tsx, App.tsx)
+├── fastapi_backend/
+│   ├── config/           # Configuration settings
+│   │   ├── __init__.py
+│   │   └── settings.py
+│   ├── Models/           # AI Models (Embeddings, Reranking)
+│   │   ├── Embedding_model/
+│   │   └── ...
+│   ├── routes/           # FastAPI endpoints (document_qa_route.py, etc.)
+│   ├── vector_databases/ # Vector store interaction code (qdrant/)
+│   │   └── qdrant/
+│   └── ...               # Other backend files (main.py, requirements.txt - assumed)
+├── README.md           # This file
+└── ...                 # Other project files (.gitignore, .env - assumed)
 ```
 
----
+## Setup
 
-## 🔐 Authentication
+Follow these steps to set up the project locally:
 
-- User authentication and authorization are handled via Supabase.
-- API endpoints are protected using a Supabase JWT bearer middleware.
+### 1. Clone the Repository
 
----
+```bash
+git clone <repository_url>
+cd Mult_modal_RAG
+```
 
+### 2. Backend Setup
 
----
+Navigate to the backend directory:
 
-## 🧠 How It Works
+```bash
+cd fastapi_backend
+```
 
-1. **Upload** your academic material (PDF, image, or video).
-2. **Ask** any question about the content.
-3. **Retrieve** contextual, AI-generated answers with references to your material.
-4. **Save** or export answers for later study.
+Install Python dependencies. It's recommended to use a virtual environment.
 
----
+```bash
+# Create a virtual environment
+python -m venv venv
+# Activate the virtual environment
+# On Windows:
+.\venv\Scripts\activate
+# On macOS/Linux:
+source venv/bin/activate
 
-## 📄 License
+# Install dependencies (assuming requirements.txt exists)
+pip install -r requirements.txt
+# If requirements.txt does not exist, you'll need to install packages manually:
+# pip install fastapi uvicorn[standard] langchain langchain-community qdrant-client supabase-py loguru python-dotenv pydantic-settings PyMuPDF lucide-react framer-motion numpy # Add other dependencies as needed
+```
 
-MIT License
+#### Environment Variables
 
----
+Create a `.env` file in the `fastapi_backend/` directory based on `fastapi_backend/.env.example` (you might need to create a `.env.example` if it doesn't exist). You will need to configure:
 
-## 🙏 Acknowledgements
+-   **Supabase:** `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_PRIVATE`.
+-   **LLM API Keys:** `CEREBRAS_API_KEY`, `GOOGLE_API_KEY`, `GROQ_API_KEY` (based on `settings.py`).
+-   Any other settings required by `fastapi_backend/config/settings.py`.
 
-- OpenAI, HuggingFace, Google, Groq, and the open-source community for LLMs and vector search.
-- [LangChain](https://www.langchain.com/) for orchestration.
-- [Supabase](https://supabase.com/) for authentication.
+#### Database Setup (Supabase and Qdrant)
+
+-   **Supabase:** Set up a Supabase project and configure your database tables (e.g., a `documents` table and a `document_qa` table as seen in `document_qa_route.py`). Obtain your project URL and service role key.
+-   **Qdrant:** Ensure a Qdrant instance is running (locally or hosted) and accessible to your backend. The backend code initializes a collection named `demo_collection` (seen in `document_qa_route.py`), but you might need to configure the Qdrant connection URL in your environment variables if it's not running on the default `localhost:6333`.
+
+### 3. Frontend Setup
+
+Open a new terminal, navigate to the project root, and then to the frontend directory:
+
+```bash
+cd .. # Go back to project root if you are in fastapi_backend
+cd Frontend
+```
+
+Install frontend dependencies:
+
+```bash
+npm install # or yarn install or pnpm install
+```
+
+#### Environment Variables
+
+Create a `.env` file in the `Frontend/` directory based on `Frontend/.env.local.example` (you might need to create one). Configure any frontend-specific environment variables, such as the backend API URL if it's different from the default expected by `ai/react` or your custom fetch calls.
+
+## Usage
+
+### 1. Start the Backend Server
+
+From the `fastapi_backend/` directory (with your virtual environment activated):
+
+```bash
+uvicorn main:app --reload
+```
+
+(Assuming your main FastAPI application instance is named `app` in `main.py`)
+
+### 2. Start the Frontend Development Server
+
+From the `Frontend/` directory:
+
+```bash
+npm run dev # or yarn dev or pnpm dev
+```
+
+### 3. Access the Application
+
+Open your web browser and navigate to the address provided by the Vite development server (usually `http://localhost:5173`).
+
+Interact with the different chat sections (Document, Image, Video, Audio) via the navigation.
+
+## Contributing
+
+We welcome contributions! Please see the [CONTRIBUTING.md](CONTRIBUTING.md) file for details on how to contribute. (Create this file if it doesn't exist)
+
+## License
+
+This project is licensed under the [MIT License](LICENSE). (Create a LICENSE file if it doesn't exist)

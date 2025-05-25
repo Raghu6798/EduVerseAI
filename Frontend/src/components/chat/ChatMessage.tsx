@@ -1,15 +1,14 @@
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { cn } from '@/lib/utils';
+import { cn } from '../../lib/utils';
 import { Message } from './ChatInterface';
-import { TypewriterInput } from '../ui/TypewriterPlaceholder';
+import { TypewriterEffectCycle } from '../ui/TypewriterPlaceholder';
 
-
-export const ChatMessage = ({ message }: { message: Message }) => {
+export const ChatMessage = ({ message, isDocumentUploaded }: { message: Message, isDocumentUploaded: boolean }) => {
   return (
     <>
-      {message.sender === 'user' && <TypewriterPlaceholder />}
+      {message.sender === 'user' && !isDocumentUploaded && <TypewriterEffectCycle />}
       <div key={message.id} className={cn("flex", message.sender === "user" ? "justify-end" : "justify-start")}>
         <div
           className={cn(
@@ -21,12 +20,11 @@ export const ChatMessage = ({ message }: { message: Message }) => {
               : "bg-[#2D2A33] text-white"
           )}
         >
-          <ReactMarkdown 
-            className="prose prose-invert max-w-none"
-            remarkPlugins={[remarkGfm]}
-          >
-            {message.content}
-          </ReactMarkdown>
+          <div className="prose prose-invert max-w-none">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              {message.content}
+            </ReactMarkdown>
+          </div>
         </div>
       </div>
     </>
