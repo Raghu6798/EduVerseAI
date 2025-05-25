@@ -15,7 +15,7 @@ This project is a Multimodal Retrieval Augmented Generation (RAG) application de
 
 ## Technologies Used
 
-### Frontend (Frontend/)
+### Frontend (`Frontend/`)
 
 - React
 - Vite
@@ -25,7 +25,7 @@ This project is a Multimodal Retrieval Augmented Generation (RAG) application de
 - Tailwind CSS (inferred from class names)
 - framer-motion (for animations)
 
-### Backend (fastapi_backend/)
+### Backend (`fastapi_backend/`)
 
 - FastAPI
 - Python
