@@ -1,4 +1,4 @@
-# Multimodal RAG Application
+# EduverseAI
 
 ## Project Description
 
