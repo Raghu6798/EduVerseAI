@@ -9,7 +9,7 @@ from pydantic import BaseModel
 from tenacity import retry,stop_after_attempt, wait_exponential
 
 # ==================== FastAPI ====================
-import FastAPI as _  # Prevent shadowing the module name
+
 from fastapi import APIRouter, File, UploadFile, HTTPException, Form,Request,Depends
 from fastapi.security import HTTPBearer
 from fastapi.responses import JSONResponse
