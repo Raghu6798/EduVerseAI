@@ -1,5 +1,4 @@
 "use client"
-
 import React, { useState, useRef, useEffect } from "react"
 import axios from "axios"
 import { z } from "zod"
@@ -174,7 +173,7 @@ export const ChatInterface = ({ mode }: { mode: string }) => {
       const token = supabaseSession?.access_token // ✅ Get token
 
       const response = await axios.post(
-        "http://localhost:8000/api/v1/ask",
+        "http://localhost:8000/api/v1/query",
         {
           question: input,
           document_id: documentId,
@@ -518,55 +517,66 @@ export const ChatInterface = ({ mode }: { mode: string }) => {
               </div>
             )}
           </div>
-          {imageDescription && (
-            <div
-              className={`mb-4 p-3 rounded-lg ${
-                imageDescription.startsWith("Error") ? "bg-red-900/30 text-red-300" : "bg-[#3E3D43] text-blue-300"
-              }`}
-            >
-              <h3 className="font-semibold">Analysis Results:</h3>
-              <p>{imageDescription}</p>
-            </div>
-          )}
-          {imageId && (
-            <div className="mb-4">
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={imageQuestion}
-                  onChange={(e) => setImageQuestion(e.target.value)}
-                  placeholder="Ask about this image..."
-                  className="flex-1 bg-[#2D2A33] text-white border border-[#3E3D43] rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-[#9b87f5]"
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") handleImageAsk()
-                  }}
-                />
-                <Button 
-                  onClick={handleImageAsk} 
-                  disabled={imageIsLoading || !imageQuestion.trim()} 
-                  className="px-4 bg-[#7E69AB] hover:bg-[#9b87f5] text-white"
-                >
-                  {imageIsLoading ? "Asking..." : "Ask"}
-                </Button>
-              </div>
-            </div>
-          )}
-          {imageAnswer && (
-            <div className="mb-4 p-3 bg-[#2D2A33] rounded-lg border border-[#3E3D43] text-white">
-              <h3 className="font-semibold">Answer:</h3>
-              <p>{imageAnswer}</p>
-              {imageContextSnippets.length > 0 && (
-                <div className="mt-2">
-                  <h4 className="font-semibold text-sm">Key Points:</h4>
-                  <ul className="list-disc pl-5 mt-1 text-sm">
-                    {imageContextSnippets.map((snippet, idx) => (
-                      <li key={idx}>{snippet}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          )}
+        {imageDescription && (
+  <div
+    className={`mb-4 p-3 rounded-lg ${
+      imageDescription.startsWith("Error")
+        ? "bg-red-900/30 text-red-300"
+        : "bg-[#3E3D43] text-blue-200"
+    }`}
+  >
+    <h3 className="font-semibold text-yellow-200">Analysis Results:</h3>
+    
+    <div className="prose prose-sm prose-invert text-blue-200">
+      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+        {imageDescription}
+      </ReactMarkdown>
+    </div>
+  </div>
+)}
+
+        {imageId && imageDescription && (
+  <div className="mt-4 space-y-2">
+    
+
+    <div className="flex items-center space-x-2">
+      <input
+        type="text"
+        placeholder="Ask a question about the image..."
+        className="flex-1 p-2 border rounded"
+        value={imageQuestion}
+        onChange={(e) => setImageQuestion(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") handleImageAsk()
+        }}
+      />
+      <Button onClick={handleImageAsk} disabled={imageIsLoading}>
+        {imageIsLoading ? "Asking..." : <SendIcon size={16} />}
+      </Button>
+    </div>
+
+    {imageAnswer && (
+      <div className="font-medium text-cyan-700 bg-yellow-100 px-1 rounded">
+        <h4 className="font-medium text-muted-foreground">Answer:</h4>
+        <ReactMarkdown >
+          {imageAnswer}
+        </ReactMarkdown>
+
+        {imageContextSnippets.length > 0 && (
+          <div className="mt-2">
+            <h5 className="text-sm font-semibold">Context:</h5>
+            <ul className="list-disc pl-5 text-sm text-muted-foreground">
+              {imageContextSnippets.map((snippet, idx) => (
+                <li key={idx}>{snippet}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+    )}
+  </div>
+)}
+
         </div>
       </div>
     )
