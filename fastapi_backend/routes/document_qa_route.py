@@ -1,77 +1,54 @@
-# ==================== Standard Library ====================
 import os
-import tempfile
+import json
 from uuid import uuid4
-from pathlib import Path
-from typing import List,Optional
 from datetime import datetime
-from pydantic import BaseModel
-from tenacity import retry,stop_after_attempt, wait_exponential
+
+
+from fastapi import APIRouter, UploadFile, File, Request, Depends, HTTPException, status
 
 # ==================== FastAPI ====================
 
 from fastapi import APIRouter, File, UploadFile, HTTPException, Form,Request,Depends
 from fastapi.security import HTTPBearer
-from fastapi.responses import JSONResponse
-
-# ==================== Logging ====================
+from pydantic import BaseModel
+from typing import List, Optional
+from dotenv import load_dotenv
+from tenacity import retry, wait_exponential, stop_after_attempt, stop_after_delay
 from loguru import logger
 
-# ==================== Load environment ====================
-from dotenv import load_dotenv
-load_dotenv()
-logger.info("Loaded environment variables from .env")
+from qdrant_client import QdrantClient
+from qdrant_client.http.models import VectorParams, Distance
 
-# ==================== Supabase ====================
+from langchain_qdrant import QdrantVectorStore
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_huggingface import HuggingFaceEmbeddings
+from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_core.runnables.history import RunnableWithMessageHistory
+from langchain.globals import set_llm_cache
+from langchain.schema import StrOutputParser
+from langchain_neo4j import Neo4jChatMessageHistory
+
+from mistralai import DocumentURLChunk, Mistral
 from supabase import create_client, Client
 
+from databases.neo4j.neo4j_client import graph
+from Models.Embedding_model.text_embedding import bi_embed
+from databases.redis.redis_cache import RedisSemanticCache
+
+# === Load environment variables ===
+load_dotenv()
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_PRIVATE")
+MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY")
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
-@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
-def get_supabase_client() -> Client:
-    """Initializes and returns a Supabase client with retry."""
-    return create_client(SUPABASE_URL, SUPABASE_KEY)
+supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+mistral_client = Mistral(api_key=MISTRAL_API_KEY)
 
-supabase: Client = get_supabase_client()
-logger.info("Initialized Supabase client")
+document_router = APIRouter(prefix="/api/v1", tags=["Document QA"])
 
-# ==================== LangChain + Cerebras Chat ====================
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_community.document_loaders import PyMuPDFLoader
-from langchain.prompts import ChatPromptTemplate
-from langchain.globals import set_llm_cache
-from langchain_openai import ChatOpenAI
-from langchain_qdrant import QdrantVectorStore
-from langchain.schema import StrOutputParser
-from databases.redis.redis_cache import semantic_cache
-
-# ==================== Vector DB ====================
-from databases.qdrant.qdrant_store import client as qdrant_client # Renamed to avoid conflict
-from qdrant_client.http.models import Distance, VectorParams
-from qdrant_client import QdrantClient # Import QdrantClient type
-
-# ==================== Embedding Models ====================
-from Models.Embedding_model.text_embedding import gemini_embed,bi_embed
-from Models.Embedding_model.reranking_model import colBERT
-
-# ==================== Initialize Chat Model ====================
-CEREBRAS_API_KEY = os.getenv("CEREBRAS_API_KEY")
-
-@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
-def get_cerebras_llm() -> ChatOpenAI:
-    """Initializes and returns the Cerebras LLM with retry."""
-    return ChatOpenAI(
-        base_url="https://api.cerebras.ai/v1",
-        model="llama-4-scout-17b-16e-instruct",
-        api_key=CEREBRAS_API_KEY,
-        temperature=0.5
-    )
-
-llama_4_scout = get_cerebras_llm()
-logger.info("Cerebras model qwen-3-32b initialized")
-
-# ==================== Pydantic Models ====================
+# === Models ===
 class DocumentQARequest(BaseModel):
     question: str
     document_id: str
@@ -85,36 +62,6 @@ class DocumentQAResponse(BaseModel):
     answer: str
     context: Optional[List[str]] = None
 
-
-set_llm_cache(semantic_cache)
-logger.info("Redis Semantic Cache initialized with the same embedding model being wrapped ")
-
-# ==================== Vector Store Init ====================
-@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
-def initialize_qdrant_collection(client: QdrantClient):
-    """Initializes the Qdrant collection with retry."""
-    collections = client.get_collections().collections
-    if "demo_collection" not in [col.name for col in collections]:
-        client.create_collection(
-            collection_name="demo_collection",
-            vectors_config=VectorParams(size=768, distance=Distance.COSINE),
-        )
-        logger.info("Created new Qdrant collection: demo_collection")
-    else:
-        logger.info("demo_collection already exists")
-
-initialize_qdrant_collection(qdrant_client)
-
-@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
-def get_qdrant_vector_store(client: QdrantClient) -> QdrantVectorStore:
-    """Initializes and returns Qdrant vector store with retry."""
-    return QdrantVectorStore(client=client, collection_name="demo_collection", embedding=bi_embed)
-
-vector_store = get_qdrant_vector_store(qdrant_client)
-retriever = vector_store.as_retriever(search_type="mmr")
-logger.info("Initialized vector store and retriever")
-
-# ==================== Supabase User Authentication ====================
 @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
 async def get_supabase_user(supabase_client: Client, jwt_token: str) -> dict:
     """Authenticates user with Supabase JWT and returns user data with retry."""
@@ -132,221 +79,166 @@ async def get_current_user(request: Request) -> dict:
     # Use the retriable helper function
     return await get_supabase_user(supabase, jwt_token)
 
-# ==================== Router Setup ====================
-document_router = APIRouter(prefix="/api/v1", tags=["Document QA"])
+
+# === Vector Store & LLM Setup ===
+
+qdrant_client =  QdrantClient(host="localhost", port=6333)
+collection_name = "demo_collection"
+existing_collections = qdrant_client.get_collections().collections
+existing_names = [col.name for col in existing_collections]
+if collection_name not in existing_names:
+    qdrant_client.create_collection(
+        collection_name=collection_name,
+        vectors_config=VectorParams(size=384, distance=Distance.COSINE),
+    )
+else:
+    print(f"Collection '{collection_name}' already exists.")
+vector_store = QdrantVectorStore(
+    client=qdrant_client,
+    collection_name="demo_collection",
+    embedding=bi_embed,
+)
+retriever = vector_store.as_retriever(search_kwargs={"k": 2})
 
 
-# ==================== Upload Endpoint ====================
-@document_router.post("/upload",response_model=DocumentUploadResponse)
-async def upload_file(file: UploadFile = File(...), user = Depends(get_current_user)) -> JSONResponse:
-    """
-    Handles uploading of a PDF document and stores its content for future querying.
+chat_model = ChatGoogleGenerativeAI(
+    model="gemini-2.0-flash",
+    api_key=GOOGLE_API_KEY,
+    temperature=0.4
+)
+# === Routes ===
 
-    This endpoint processes a user-uploaded PDF, splits it into manageable chunks,
-    indexes the content into a vector store for semantic search, and stores metadata
-    in the Supabase database.
+@document_router.post("/upload", response_model=DocumentUploadResponse)
+async def upload_document(file: UploadFile = File(...), user=Depends(get_current_user)):
+    document_id = str(uuid4())
+    content = await file.read()
 
-    Args:
-        file (UploadFile): The PDF file uploaded by the user. Must have a .pdf extension.
-        user (dict): The current authenticated user, extracted via dependency injection.
+    # Upload file to Mistral
+    uploaded_file = mistral_client.files.upload(
+        file={"file_name": file.filename, "content": content}, purpose="ocr"
+    )
 
-    Returns:
-        DocumentUploadResponse: Contains the document ID, page count, and success message.
+    signed_url = mistral_client.files.get_signed_url(file_id=uploaded_file.id, expiry=1)
 
-    Raises:
-        HTTPException: If the file is not a PDF (400),
-                       or if the upload or processing fails (500).
-    """
-    logger.info(f"Received file upload request: {file.filename}")
+    # OCR processing
+    pdf_response = mistral_client.ocr.process(
+        document=DocumentURLChunk(document_url=signed_url.url),
+        model="mistral-ocr-latest",
+        include_image_base64=True
+    )
 
-    if not file.filename.endswith(".pdf"):
-        logger.warning("Rejected non-PDF file upload attempt")
-        raise HTTPException(status_code=400, detail="Only PDF files are supported.")
+    response_dict = json.loads(pdf_response.json())
+    pages = response_dict.get("pages", [])
+    if not pages:
+        raise HTTPException(status_code=400, detail="No content extracted from PDF.")
 
+    chunks = "\n".join(page["markdown"] for page in pages)
+
+    # Text splitting and vector store
+    splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+    docs = splitter.create_documents([chunks])
+    ids = [str(uuid4()) for _ in range(len(docs))]
+    vector_store.add_documents(documents=docs, ids=ids)
+
+    # Metadata to store in Supabase
+    doc_data = {
+        "id": document_id,
+        "user_id": user.id,
+        "page_count": len(docs),
+        "uploaded_at": datetime.now().isoformat(),
+        "filename": file.filename,
+    }
+
+    # Retry mechanism for insertion
+    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
+    def insert_document_metadata_with_retry(data):
+        return supabase.table("documents").insert(data).execute()
+
+    # Insert into Supabase
+    insert_document_metadata_with_retry(doc_data)
+
+    return DocumentUploadResponse(
+        document_id=document_id,
+        page_count=len(pages),
+        message="Document uploaded and processed successfully."
+    )
+
+@document_router.post("/query", response_model=DocumentQAResponse)
+async def ask_question(request: DocumentQARequest, user=Depends(get_current_user)):
     try:
-        temp_file = Path(tempfile.gettempdir()) / f"{uuid4()}.pdf"
-        content = await file.read()
-        temp_file.write_bytes(content)
-        logger.debug(f"Saved uploaded file to temporary path: {temp_file}")
-
-        loader = PyMuPDFLoader(str(temp_file))
-        documents = loader.load()
-        logger.info(f"Loaded {len(documents)} document(s) from PDF")
-
-        temp_file.unlink()  # cleanup
-        logger.debug("Temporary file deleted after processing")
-
-        splitter = RecursiveCharacterTextSplitter(separators=["\n\n"], chunk_size=1200, chunk_overlap=200)
-        chunks = splitter.split_documents(documents)
-        logger.info(f"Split document into {len(chunks)} chunk(s)")
-        
-        ids = [str(uuid4()) for _ in chunks]
-        doc_id = str(uuid4())
-        
-        @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
-        def add_documents_with_retry(docs, ids):
-            """Adds documents to Qdrant with retry."""
-            vector_store.add_documents(documents=docs, ids=ids)
-
-        add_documents_with_retry(chunks, ids)
-        logger.info(f"Indexed {len(ids)} chunks into vector store")
-        doc_data = {
-            "id": doc_id,
-            "user_id": user.id,
-            "page_count": len(documents),
-            "uploaded_at": datetime.now().isoformat(),
-        }
-
-        @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
-        def insert_document_metadata_with_retry(data):
-            """Inserts document metadata into Supabase with retry."""
-            return supabase.table("documents").insert(data).execute()
-
-        insert_document_metadata_with_retry(doc_data)
-    
-        return DocumentUploadResponse(
-            document_id=doc_id,
-            page_count=len(documents),
-            message="Document processed and stored successfully"
-        )
-
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.exception(f"Failed to upload document: {file.filename}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-# ==================== Ask Endpoint ====================
-
-@document_router.post("/ask", response_model=DocumentQAResponse)
-async def ask_question(
-    request: DocumentQARequest,
-    user: dict = Depends(get_current_user)
-):
-    """
-    Handles user questions on a previously uploaded PDF document.
-
-    This endpoint:
-    - Validates the user's access to the document.
-    - Retrieves relevant document chunks via a vector retriever.
-    - Passes the retrieved content and question to a language model.
-    - Stores the generated answer along with the original question and context.
-
-    Args:
-        request (DocumentQARequest): Pydantic model containing:
-            - document_id (str): ID of the uploaded document.
-            - question (str): User's natural language question.
-            - chat_history (List[Dict]): Optional previous Q&A interactions.
-        user (dict): Authenticated user dictionary obtained via dependency.
-
-    Returns:
-        DocumentQAResponse: Contains the generated answer and the context used.
-
-    Raises:
-        HTTPException: If access is denied, document not found, or processing fails.
-    """
-    logger.info(f"Received question from user {user['id']}: {request.question}")
-
-    try:
-        # Step 1: Check document ownership
+        # Retry fetching the document metadata to verify access
         @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
         def get_document_with_retry(doc_id, user_id):
-            """Retrieves document from Supabase with retry."""
             return supabase.table("documents") \
-                          .select("*") \
-                          .eq("id", doc_id) \
-                          .eq("user_id", user_id) \
-                          .single() \
-                          .execute()
+                .select("*") \
+                .eq("id", doc_id) \
+                .eq("user_id", user_id) \
+                .single() \
+                .execute()
 
-        doc = get_document_with_retry(request.document_id, user["id"])
-
-        if not doc.data:
+        doc_response = get_document_with_retry(request.document_id, user.id)
+        if not doc_response or not doc_response.data:
             raise HTTPException(
                 status_code=403,
                 detail="You don't have access to this document."
             )
 
-        # Step 2: Retrieve context
-        @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
-        def retrieve_docs_with_retry(query):
-            """Retrieves relevant documents from vector store with retry."""
-            return retriever.invoke(query)
+        # Retrieve relevant chunks from the vector store based on question
+        context_docs = retriever.invoke(request.question)
+        context = "\n".join(doc.page_content for doc in context_docs)
 
-        relevant_docs = retrieve_docs_with_retry(request.question)
+        # Helper to get chat history for the session
+        def get_session_history(session_id: str) -> Neo4jChatMessageHistory:
+            return Neo4jChatMessageHistory(session_id=session_id, graph=graph)
 
-        logger.debug(f"Retrieved {len(relevant_docs)} relevant document(s).")
-
-        if not relevant_docs:
-            return DocumentQAResponse(
-                answer="Sorry, I couldn't find relevant content to answer this question.",
-                context=[]
-            )
-
-        context = "".join([doc.page_content for doc in relevant_docs])
-        logger.debug("Constructed context from retrieved documents.")
-
-        # Step 3: Format prompt and invoke LLM
+        # Define prompt template for chat model
         prompt = ChatPromptTemplate.from_messages([
-            ("system", """
-You are an expert academic assistant and mentor, designed to help students deeply understand academic topics and succeed in their learning journey. 
-
-You must:
-- Answer questions **clearly and accurately** using only the provided study material (`{context}`).
-- **Personalize** your responses — adapt to the student's tone, ask follow-up questions if needed, and address the student directly.
-- If asked about **learning paths** or **how to start a topic**, provide a **step-by-step timeline**, **curated topic list**, or **study plan** tailored to the complexity of the topic and typical learning curves.
-- If a student asks to **summarize** or **explain** a concept, do so in a way that's **simple**, **intuitive**, and **relatable**, possibly with analogies.
-- Offer **action-driven suggestions**, such as:
-    - "Next, you might want to look at Chapter 3 on Paging."
-    - "Try summarizing this topic in your own words or make flashcards."
-- If the material is missing or not sufficient, politely say that you need more context.
-- When answering, **assume the student is curious and committed**, and speak like a helpful, inspiring tutor.
-
-Always stay focused on `{context}`, and avoid making up facts not present in it. First and foremost, greet the student with a warm welcome calling their name: {name}, and then proceed with the answer.
-"""),
+            ("system", "Answer the following question on the given context : {context} "
+                       "as well as from your base cut-off knowledge. "
+                       "While answering the queries, also provide URL links to the documentation wherever necessary."),
+            MessagesPlaceholder(variable_name="chat_history"),
             ("human", "{question}")
         ])
 
-        @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
-        def invoke_llm_with_retry(chain, input_data):
-            """Invokes the language model with retry."""
-            return chain.invoke(input_data)
+        chat_chain = prompt | chat_model | StrOutputParser()
 
-        chain = prompt | llama_4_scout | StrOutputParser()
-        answer = invoke_llm_with_retry(chain, {
-            "question": request.question,
-            "context": context,
-            "name": user.get("user_metadata", {}).get("name", "Student")
-        })
+        chat_with_history = RunnableWithMessageHistory(
+            chat_chain,
+            get_session_history,
+            input_messages_key="question",
+            history_messages_key="chat_history",
+        )
 
-        # Step 4: Store Q&A in Supabase
+        response = chat_with_history.invoke(
+            {
+                "question": request.question,
+                "context": context
+            },
+            config={"configurable": {"session_id": user.id}}
+        )
+
+        # Prepare data for logging into Supabase
         qa_data = {
             "id": str(uuid4()),
-            "user_id": user["id"],
+            "user_id": user.id,
             "document_id": request.document_id,
             "question": request.question,
-            "answer": answer,
+            "answer": response,
             "context": [context],
             "created_at": datetime.now().isoformat()
         }
 
         @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
         def insert_qa_data_with_retry(data):
-            """Inserts Q&A data into Supabase with retry."""
             supabase.table("document_qa").insert(data).execute()
 
         insert_qa_data_with_retry(qa_data)
 
         return DocumentQAResponse(
-            answer=answer,
-            context=[doc.page_content for doc in relevant_docs]
+            answer=response,
+            context=[doc.page_content for doc in context_docs]
         )
-
-    except HTTPException:
-        raise  # propagate known errors
+        
     except Exception as e:
-        logger.exception(f"Question answering failed: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail="Failed to generate answer. Please try again later."
-        )
+        logger.error(f"Query failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Query failed: {str(e)}")
