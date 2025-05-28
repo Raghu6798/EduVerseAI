@@ -29,8 +29,7 @@ litellm==1.70.0
 
 # Document Processing
 pymupdf==1.25.5
-pypdf2==3.0.1
-pylatex==1.0.0
+
 
 # Database
 supabase==2.15.1
