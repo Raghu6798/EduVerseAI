@@ -1,32 +1,22 @@
-# Base image with Python
+# Use an official Python runtime as a parent image
 FROM python:3.11-slim
 
-# Set environment variables
+# Set environment variables to prevent .pyc files and enable log output
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# Create a working directory
+# Set working directory inside the container
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    libpq-dev \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
+# Copy requirements and install dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy project files
+# Copy the FastAPI backend code into the container
 COPY . .
 
-# Install uv (or fallback to pip if needed)
-RUN pip install --upgrade pip \
-    && pip install uv
-
-# Install dependencies using uv (if you use uv with pyproject.toml)
-RUN uv pip install --system --no-deps .
-
-# Expose FastAPI's default port
+# Expose FastAPI default port
 EXPOSE 8000
 
-# Start the FastAPI server
+# Command to run the FastAPI application using uvicorn (main.py contains `app`)
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
