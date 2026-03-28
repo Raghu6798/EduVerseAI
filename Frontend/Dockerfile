@@ -8,7 +8,7 @@ FROM base AS deps
 COPY package.json bun.lockb* ./
 # Install dependencies using bun's high-performance package manager
 # Note: --frozen-lockfile is recommended for reproducible CI builds
-RUN bun install --frozen-lockfile
+RUN bun install 
 
 # --- Stage 3: Builder ---
 FROM deps AS builder
