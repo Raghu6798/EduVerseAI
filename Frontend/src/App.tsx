@@ -1,18 +1,16 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
-import Home from "./pages/Home"
+import Home from "./pages/home"
 import Pricing from "./pages/pricing"
 import Features from "./pages/features"
 import SignIn from "./components/auth/SignIn"
 import SignUp from "./components/auth/SignUp"
 import { AuthProvider } from "./context/AuthContext"
-import { DocumentChat } from './pages/DocumentChat'
-import { VideoChat } from './pages/VideoChat'
-import { ImageChat } from './pages/ImageChat'
+import { DocumentChat } from './pages/document-chat'
+import { VideoChat } from './pages/video-chat'
+import { ImageChat } from './pages/image-chat'
 import { Navbar } from "./components/layout/navbar"
 import { Footer } from "./components/layout/footer"
-import ProfilePage from "./pages/Profile" // ✅ Correct import
-
-// Main layout component for protected routes
+import ProfilePage from "./pages/profile" 
 const MainLayout = ({ children }: { children: React.ReactNode }) => (
   <div className="flex flex-col min-h-screen">
     <Navbar />

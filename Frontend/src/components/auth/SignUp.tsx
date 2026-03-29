@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { AlertCircle, Loader, UserPlus } from 'lucide-react';
 import Button from '../ui/button';
-import Navbar from '../layout/Navbar';
+import Navbar from '../layout/navbar';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AuroraGradientBackground } from '../ui/particles-background';
 

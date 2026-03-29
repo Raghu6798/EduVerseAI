@@ -19,7 +19,7 @@ import {
   CreditCard
 } from "lucide-react"
 import { useAuth } from "../../context/AuthContext"
-import Avatar from "../ui/Avatar"
+import Avatar from "../ui/avatar"
 
 export const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false)

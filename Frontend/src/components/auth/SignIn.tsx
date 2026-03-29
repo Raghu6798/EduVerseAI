@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { Loader, LogIn, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Button from '../ui/button';
-import Navbar from '../layout/Navbar';
+import Navbar from '../layout/navbar';
 import { AuroraGradientBackground } from '../ui/particles-background';
 
 // Page transition variants
