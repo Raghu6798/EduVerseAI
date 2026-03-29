@@ -48,8 +48,8 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 EXPOSE 80
 
 # Health check to ensure the application is reachable
-HEALTHCHECK --interval=30s --timeout=3s \
-  CMD wget --quiet --tries=1 --spider http://localhost/ || exit 1
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s \
+  CMD wget --quiet --tries=1 --spider http://127.0.0.1/ || exit 1
 
 # Start Nginx
 CMD ["nginx", "-g", "daemon off;"]
