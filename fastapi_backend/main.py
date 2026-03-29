@@ -11,7 +11,12 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173","https://scholar-ai-6r7j.vercel.app/"],  # Your React app URL
+    allow_origins=[
+        "http://localhost:5173",
+        "https://eduverse.cortexruntime.info",
+       
+    ],
+    allow_origin_regex = r"https://(?:.*\.)?cortexruntime\.info",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
