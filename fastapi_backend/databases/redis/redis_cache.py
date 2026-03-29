@@ -12,8 +12,7 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
-r = redis.Redis(host='localhost', port=6379, db=0)
-print(r)
+REDIS_URL = os.getenv("REDIS_URL")
 
 bi_embed = HuggingFaceEmbeddings(   
     model_name="roberta-base-nli-stsb-mean-tokens",
@@ -22,5 +21,5 @@ bi_embed = HuggingFaceEmbeddings(
 
 
 semantic_cache = RedisSemanticCache(
-    redis_url="redis://localhost:6379", embeddings=bi_embed, distance_threshold=0.2
+    redis_url=REDIS_URL, embeddings=bi_embed, distance_threshold=0.2
 )
