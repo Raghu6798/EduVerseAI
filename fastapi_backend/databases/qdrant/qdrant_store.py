@@ -1,4 +1,7 @@
 from qdrant_client import QdrantClient
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
-client = QdrantClient(url="http://localhost:6333")
+client = QdrantClient(url=os.getenv("QDRANT_URL"))
 print(client)
