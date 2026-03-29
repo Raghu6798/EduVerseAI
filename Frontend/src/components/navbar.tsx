@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Button } from "../ui/Button";
+import { Button } from "../ui/button";
 import {
   FileText,
   Home,
@@ -15,7 +15,7 @@ import {
   ChevronDown,
   CreditCard,
 } from "lucide-react";
-import { Sheet, SheetContent, SheetTrigger } from "../ui/Sheet";
+import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
 import { useAuth } from "../context/AuthContext";
 
 export function Navbar() {

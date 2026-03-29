@@ -3,7 +3,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { cn } from '../../lib/utils';
 import { Message } from './ChatInterface';
-import { TypewriterEffectCycle } from '../ui/TypewriterPlaceholder';
+import { TypewriterEffectCycle } from '../ui/typewriter-placeholder';
 
 export const ChatMessage = ({ message, isDocumentUploaded }: { message: Message, isDocumentUploaded: boolean }) => {
   return (

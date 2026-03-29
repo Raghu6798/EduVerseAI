@@ -5,7 +5,7 @@ import type React from "react"
 import { useState } from "react"
 import Button from "../ui/Button"
 import { PaperclipIcon, SendIcon } from "lucide-react"
-import { TypewriterEffectCycle } from "../../components/ui/TypewriterPlaceholder"
+import { TypewriterEffectCycle } from "../../components/ui/typewriter-placeholder"
 
 interface ChatInputProps {
   input: string

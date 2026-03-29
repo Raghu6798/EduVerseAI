@@ -2,9 +2,9 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Check, HelpCircle } from 'lucide-react';
-import Navbar from '../components/layout/Navbar';
-import Footer from '../components/layout/Footer';
-import Button from '../components/ui/Button';
+import Navbar from '../components/layout/navbar';
+import Footer from '../components/layout/footer';
+import Button from '../components/ui/button';
 
 const plans = [
   {

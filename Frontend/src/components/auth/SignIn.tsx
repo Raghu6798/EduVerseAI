@@ -3,9 +3,9 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Loader, LogIn, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import Button from '../ui/Button';
+import Button from '../ui/button';
 import Navbar from '../layout/Navbar';
-import { AuroraGradientBackground } from '../ui/ParticlesBackground';
+import { AuroraGradientBackground } from '../ui/particles-background';
 
 // Page transition variants
 const pageVariants = {

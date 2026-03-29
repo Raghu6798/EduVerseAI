@@ -1,8 +1,8 @@
 import type React from "react"
 import { Link } from "react-router-dom"
 import { FileText, ImageIcon, Video, Headphones } from "lucide-react"
-import Navbar from "../components/layout/Navbar"
-import Footer from "../components/layout/Footer"
+import Navbar from "../components/layout/navbar"
+import Footer from "../components/layout/footer"
 
 const Features: React.FC = () => {
   // Features with their details

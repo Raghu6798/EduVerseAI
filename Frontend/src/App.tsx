@@ -8,8 +8,8 @@ import { AuthProvider } from "./context/AuthContext"
 import { DocumentChat } from './pages/DocumentChat'
 import { VideoChat } from './pages/VideoChat'
 import { ImageChat } from './pages/ImageChat'
-import { Navbar } from "./components/layout/Navbar"
-import { Footer } from "./components/layout/Footer"
+import { Navbar } from "./components/layout/navbar"
+import { Footer } from "./components/layout/footer"
 import ProfilePage from "./pages/Profile" // ✅ Correct import
 
 // Main layout component for protected routes

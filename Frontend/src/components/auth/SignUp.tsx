@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { AlertCircle, Loader, UserPlus } from 'lucide-react';
-import Button from '../ui/Button';
+import Button from '../ui/button';
 import Navbar from '../layout/Navbar';
 import { motion, AnimatePresence } from 'framer-motion';
-import { AuroraGradientBackground } from '../ui/ParticlesBackground';
+import { AuroraGradientBackground } from '../ui/particles-background';
 
 // Enhanced animation variants
 const pageVariants = {
