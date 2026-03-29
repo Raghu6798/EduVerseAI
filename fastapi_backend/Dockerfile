@@ -9,8 +9,10 @@ ENV PYTHONUNBUFFERED=1
 WORKDIR /app
 
 # Copy requirements and install dependencies
+# Use CPU-only torch to avoid downloading 3GB+ of NVIDIA/CUDA packages
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu && \
+    pip install --no-cache-dir -r requirements.txt
 
 # Copy the FastAPI backend code into the container
 COPY . .
