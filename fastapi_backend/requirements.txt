@@ -4,6 +4,12 @@ uvicorn
 python-dotenv
 loguru
 
+# Install CPU-only torch to save space
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch
+torchvision
+torchaudio
+
 langchain
 langchain-cohere
 langchain-community
