@@ -58,7 +58,7 @@ embeddings = HuggingFaceEmbeddings(
 )
 
 llm = ChatGoogleGenerativeAI(
-    model="gemini-2.0-flash",
+    model="gemini-2.5-flash",
     temperature=0.8,
     verbose=True,
     api_key=os.getenv("GOOGLE_API_KEY")
@@ -92,7 +92,7 @@ def process_image(image_data: str, mime_type: str = "image/jpeg") -> str:
         
         # Generate content using the uploaded file
         response = client.models.generate_content(
-            model="gemini-2.0-flash",
+            model="gemini-2.5-flash",
             contents=[my_file, "Describe this image in detail."]
         )
         logger.info("Generated content description from image")

@@ -112,7 +112,7 @@ async def process_youtube_video(request: YouTubeVideoRequest):
     try:
         logger.debug("Initializing Google GenAI content generation")
         response = client.models.generate_content(
-            model='models/gemini-2.5-flash-preview-04-17',
+            model='models/gemini-2.5-flash',
             contents=types.Content(
                 parts=[
                     types.Part(
@@ -190,7 +190,7 @@ async def upload_video(file: UploadFile = File(...)):
         # Generate content
         logger.debug("Generating video content summary")
         response = client.models.generate_content(
-            model="gemini-2.0-flash",
+            model="gemini-2.5-flash",
             contents=[
                 myfile,
                 "Summarize this video. Then create a quiz with an answer key based on the information in this video."

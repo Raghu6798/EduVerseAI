@@ -102,7 +102,7 @@ retriever = vector_store.as_retriever(search_kwargs={"k": 2})
 
 
 chat_model = ChatGoogleGenerativeAI(
-    model="gemini-2.0-flash",
+    model="gemini-2.5-flash",
     api_key=GOOGLE_API_KEY,
     temperature=0.4
 )

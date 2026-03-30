@@ -31,3 +31,5 @@ isort
 pytest
 
 sentence-transformers
+tenacity
+mistralai
