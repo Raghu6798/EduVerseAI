@@ -1,4 +1,2 @@
-from mistralai.client import Mistral
-from mistralai import DocumentURLChunk
-
-print(DocumentURLChunk)
+from mistralai.client.models import DocumentURLChunk
+print(DocumentURLChunk) 

@@ -29,7 +29,8 @@ from langchain_core.globals import set_llm_cache
 from langchain_core.output_parsers import StrOutputParser
 from langchain_neo4j import Neo4jChatMessageHistory
 
-from mistralai.client import Mistral, DocumentURLChunk
+from mistralai.client import Mistral
+from mistralai.client.models import DocumentURLChunk
 from supabase import create_client, Client
 
 from databases.neo4j.neo4j_client import graph
