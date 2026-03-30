@@ -72,9 +72,7 @@ class TestingConfig(BaseConfig):
     TESTING: bool = True
 
     CACHE_TTL: int = 0  
-
     QDRANT_URL: str 
-    REDIS_URL: str
 
 config_by_env: Dict[str, BaseConfig] = {
     "development": DevelopmentConfig,
