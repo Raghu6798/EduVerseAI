@@ -25,7 +25,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables.history import RunnableWithMessageHistory
-from langchain.globals import set_llm_cache
+from langchain_core.globals import set_llm_cache
 from langchain_core.output_parsers import StrOutputParser
 from langchain_neo4j import Neo4jChatMessageHistory
 
@@ -34,7 +34,7 @@ from supabase import create_client, Client
 
 from databases.neo4j.neo4j_client import graph
 from Models.Embedding_model.text_embedding import bi_embed
-from databases.redis.redis_cache import RedisSemanticCache
+from databases.redis.redis_cache import semantic_cache
 
 # === Load environment variables ===
 load_dotenv()
@@ -47,6 +47,8 @@ supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 mistral_client = Mistral(api_key=MISTRAL_API_KEY)
 
 document_router = APIRouter(prefix="/api/v1", tags=["Document QA"])
+
+set_llm_cache(semantic_cache)
 
 # === Models ===
 class DocumentQARequest(BaseModel):
