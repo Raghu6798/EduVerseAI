@@ -33,3 +33,4 @@ pytest
 sentence-transformers
 tenacity
 mistralai
+langchain-text-splitters
