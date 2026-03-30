@@ -21,6 +21,7 @@ mistralai
 
 pymupdf
 
+supabase
 supabase_auth
 
 langfuse
