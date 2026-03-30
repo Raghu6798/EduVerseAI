@@ -8,17 +8,15 @@ ENV UV_COMPILE_BYTECODE=1 \
 
 WORKDIR /app
 
-# Install dependencies separately to leverage Docker layer caching
-# This only runs if uv.lock or pyproject.toml changes
-RUN --mount=type=cache,target=/root/.cache/uv \
-    --mount=type=bind,source=uv.lock,target=uv.lock \
-    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
-    uv sync --frozen --no-install-project --no-dev
+# Create a virtual environment
+RUN uv venv /app/.venv
+ENV PATH="/app/.venv/bin:$PATH"
 
-# Copy the source code and sync the project
-COPY . /app
+# Install dependencies from requirements.txt
+# This layer is cached until requirements.txt changes
+COPY requirements.txt .
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --no-dev
+    uv pip install -r requirements.txt
 
 
 # Stage 2: Runtime stage
