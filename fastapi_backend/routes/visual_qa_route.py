@@ -23,8 +23,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 import faiss
 from google import genai
 from loguru import logger
-from langchain_core.globals import set_llm_cache
-from databases.redis.redis_cache import semantic_cache
+
 
 image_router = APIRouter(
     prefix="/image-qa",

@@ -25,7 +25,6 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables.history import RunnableWithMessageHistory
-from langchain_core.globals import set_llm_cache
 from langchain_core.output_parsers import StrOutputParser
 from langchain_neo4j import Neo4jChatMessageHistory
 
@@ -35,7 +34,7 @@ from supabase import create_client, Client
 
 from databases.neo4j.neo4j_client import graph
 from Models.Embedding_model.text_embedding import bi_embed
-from databases.redis.redis_cache import semantic_cache
+
 
 # === Load environment variables ===
 load_dotenv()
