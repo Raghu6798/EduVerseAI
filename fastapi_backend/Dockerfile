@@ -13,10 +13,8 @@ RUN uv venv /app/.venv
 ENV PATH="/app/.venv/bin:$PATH"
 
 # Install dependencies from requirements.txt
-# This layer is cached until requirements.txt changes
 COPY requirements.txt .
-RUN --mount=type=cache,target=/root/.cache/uv \
-    uv pip install -r requirements.txt
+RUN uv pip install -r requirements.txt
 
 
 # Stage 2: Runtime stage
