@@ -1,7 +1,6 @@
 import redis
 from langchain_redis import RedisSemanticCache
 
-from langchain.embeddings.base import Embeddings
 from typing import List
 from pydantic import SecretStr
 from langchain_core.utils.utils import secret_from_env
