@@ -1,24 +1,42 @@
-# Use an official Python runtime as a parent image
-FROM python:3.11-slim
+# Stage 1: Build stage
+FROM ghcr.io/astral-sh/uv:python3.11-bookworm-slim AS builder
 
-# Set environment variables to prevent .pyc files and enable log output
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
+# Enable bytecode compilation and set environment
+ENV UV_COMPILE_BYTECODE=1 \
+    UV_LINK_MODE=copy \
+    PYTHONUNBUFFERED=1
 
-# Set working directory inside the container
 WORKDIR /app
 
-# Copy requirements and install dependencies
-# Use CPU-only torch to avoid downloading 3GB+ of NVIDIA/CUDA packages
-COPY requirements.txt .
-RUN pip install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu && \
-    pip install --no-cache-dir -r requirements.txt
+# Install dependencies separately to leverage Docker layer caching
+# This only runs if uv.lock or pyproject.toml changes
+RUN --mount=type=cache,target=/root/.cache/uv \
+    --mount=type=bind,source=uv.lock,target=uv.lock \
+    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
+    uv sync --frozen --no-install-project --no-dev
 
-# Copy the FastAPI backend code into the container
-COPY . .
+# Copy the source code and sync the project
+COPY . /app
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-dev
 
-# Expose FastAPI default port
+
+# Stage 2: Runtime stage
+FROM python:3.11-slim-bookworm
+
+# Set runtime environment variables
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PATH="/app/.venv/bin:$PATH"
+
+WORKDIR /app
+
+# Copy only the virtual environment from the builder
+COPY --from=builder /app/.venv /app/.venv
+
+# Copy the rest of your application
+COPY . /app
+
+# Expose port and start the application
 EXPOSE 8000
-
-# Command to run the FastAPI application using uvicorn (main.py contains `app`)
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

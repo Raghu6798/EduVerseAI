@@ -59,18 +59,10 @@ embeddings = HuggingFaceEmbeddings(
 )
 logger.info(f"Using embedding model: {EMBEDDING_MODEL}")
 app=FastAPI()
-# === Chat Model Initialization ===
-qwen_32 = ChatCerebras(
-    model="qwen-3-32b",
-    api_key=os.getenv("CEREBRAS_API_KEY"),
-    temperature=0.5
-)
-logger.info("Cerebras model qwen-3-32b initialized")
 
-# === In-memory Document Store ===
 document_stores = {}
 
-# === Pydantic Models ===
+
 class DocumentQARequest(BaseModel):
     question: str
     document_id: str

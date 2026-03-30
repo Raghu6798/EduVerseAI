@@ -51,15 +51,8 @@ class DevelopmentConfig(BaseConfig):
     """Development environment configuration."""
     DEBUG: bool = True
     LOG_LEVEL: str = "DEBUG"
-    
-    # Development-specific settings
-    CORS_ORIGINS: list[str] = [
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "http://localhost:8000",
-        "http://127.0.0.1:8000"
-    ]
 
+    
 class ProductionConfig(BaseConfig):
     """Production environment configuration."""
     DEBUG: bool = False
@@ -77,16 +70,12 @@ class TestingConfig(BaseConfig):
     """Testing environment configuration."""
     DEBUG: bool = True
     TESTING: bool = True
-    
-    # Test-specific settings
-    CORS_ORIGINS: list[str] = ["http://test.localhost"]
-    CACHE_TTL: int = 0  # Disable caching during tests
-    
-    # Use in-memory databases for testing
-    QDRANT_URL: str = "http://localhost:6333"
-    REDIS_URL: str = "redis://localhost:6379"
 
-# Environment configuration mapping
+    CACHE_TTL: int = 0  
+
+    QDRANT_URL: str 
+    REDIS_URL: str
+
 config_by_env: Dict[str, BaseConfig] = {
     "development": DevelopmentConfig,
     "production": ProductionConfig,

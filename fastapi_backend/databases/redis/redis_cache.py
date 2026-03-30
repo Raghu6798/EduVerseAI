@@ -5,7 +5,6 @@ from langchain.embeddings.base import Embeddings
 from typing import List
 from pydantic import SecretStr
 from langchain_core.utils.utils import secret_from_env
-import google.generativeai as genai
 from langchain_huggingface import HuggingFaceEmbeddings
 import os
 
