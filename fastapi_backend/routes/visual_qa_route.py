@@ -17,13 +17,13 @@ from langchain_community.vectorstores import FAISS
 from langchain_community.docstore import InMemoryDocstore
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_core.messages import HumanMessage
 from langchain_google_genai import ChatGoogleGenerativeAI
 import faiss
 from google import genai
 from loguru import logger
 
+from Models.Embedding_model.text_embedding import gemini_embed
 
 image_router = APIRouter(
     prefix="/image-qa",
@@ -50,13 +50,6 @@ class ImageQAResponse(BaseModel):
     context: Optional[list[str]] = None
     qa_id: str
 
-# Initialize models and stores
-model_name = "sentence-transformers/all-mpnet-base-v2"
-embeddings = HuggingFaceEmbeddings(
-    model_name=model_name,
-    model_kwargs={'device': 'cpu'},
-    encode_kwargs={'normalize_embeddings': False}
-)
 
 llm = ChatGoogleGenerativeAI(
     model="gemini-2.5-flash",
@@ -174,12 +167,12 @@ async def upload_image(
         chunks = text_splitter.split_documents(knowledge)
         logger.info(f"Split image description into {len(chunks)} chunks")
 
-        dim = len(embeddings.embed_query("hello world"))
+        dim = len(gemini_embed.embed_query("hello world"))
         index = faiss.IndexFlatL2(dim)
         logger.info("Initialized FAISS index")
 
         vector_store = FAISS(
-            embedding_function=embeddings,
+            embedding_function=gemini_embed,
             index=index,
             docstore=InMemoryDocstore(),
             index_to_docstore_id={},

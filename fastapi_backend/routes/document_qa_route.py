@@ -22,7 +22,6 @@ from qdrant_client.http.models import VectorParams, Distance
 from langchain_qdrant import QdrantVectorStore
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain_core.output_parsers import StrOutputParser
@@ -33,7 +32,7 @@ from mistralai.client.models import DocumentURLChunk
 from supabase import create_client, Client
 
 from databases.neo4j.neo4j_client import graph
-from Models.Embedding_model.text_embedding import bi_embed
+from Models.Embedding_model.text_embedding import gemini_embed
 
 
 # === Load environment variables ===
@@ -82,16 +81,16 @@ async def get_current_user(request: Request) -> dict:
 
 
 
-qdrant_url = os.getenv("QDRANT_URL", "http://localhost:6333")
+qdrant_url = os.getenv("QDRANT_URL")
 qdrant_api_key = os.getenv("QDRANT_API_KEY")
 qdrant_client = QdrantClient(url=qdrant_url, api_key=qdrant_api_key)
-collection_name = "demo_collection"
+collection_name = "Eduverse_docs"
 try:
     existing_collections = qdrant_client.get_collections().collections
     collection_names = [collection.name for collection in existing_collections]
-    if "Eduverse_docs" not in collection_names:
+    if collection_name not in collection_names:
         qdrant_client.create_collection(
-            collection_name="Eduverse_docs",
+            collection_name=collection_name,
             vectors_config=VectorParams(size=768, distance=Distance.COSINE),
         )
 except Exception as e:
@@ -101,8 +100,8 @@ else:
     
 vector_store = QdrantVectorStore(
     client=qdrant_client,
-    collection_name="demo_collection",
-    embedding=bi_embed,
+    collection_name=collection_name,
+    embedding=gemini_embed,
 )
 retriever = vector_store.as_retriever(search_kwargs={"k": 2})
 

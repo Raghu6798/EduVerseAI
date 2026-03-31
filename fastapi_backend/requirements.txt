@@ -1,4 +1,3 @@
-cohere
 fastapi
 uvicorn
 python-dotenv
@@ -6,13 +5,9 @@ loguru
 
 # Install CPU-only torch to save space
 --extra-index-url https://download.pytorch.org/whl/cpu
-torch
-torchvision
-torchaudio
 
 langchain
 langchain-google-genai
-langchain-huggingface
 langchain-mistralai
 langchain-qdrant
 langchain-neo4j
@@ -27,7 +22,7 @@ pymupdf
 supabase
 supabase_auth
 
-sentence-transformers
+
 tenacity
 mistralai
 langchain-text-splitters
