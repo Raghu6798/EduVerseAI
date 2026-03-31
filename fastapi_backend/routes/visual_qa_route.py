@@ -65,7 +65,7 @@ llm = ChatGoogleGenerativeAI(
     api_key=os.getenv("GOOGLE_API_KEY")
 )
 
-set_llm_cache(semantic_cache)
+
 
 
 image_stores = {}

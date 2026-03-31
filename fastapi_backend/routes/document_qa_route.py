@@ -48,7 +48,6 @@ mistral_client = Mistral(api_key=MISTRAL_API_KEY)
 
 document_router = APIRouter(prefix="/api/v1", tags=["Document QA"])
 
-set_llm_cache(semantic_cache)
 
 # === Models ===
 class DocumentQARequest(BaseModel):
