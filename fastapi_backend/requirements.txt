@@ -11,8 +11,6 @@ torchvision
 torchaudio
 
 langchain
-langchain-cohere
-langchain-community
 langchain-google-genai
 langchain-huggingface
 langchain-mistralai
@@ -28,13 +26,6 @@ pymupdf
 
 supabase
 supabase_auth
-
-langfuse
-
-ruff
-black
-isort
-pytest
 
 sentence-transformers
 tenacity
