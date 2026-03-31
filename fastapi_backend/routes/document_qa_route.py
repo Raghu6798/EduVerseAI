@@ -83,7 +83,8 @@ async def get_current_user(request: Request) -> dict:
 
 
 qdrant_url = os.getenv("QDRANT_URL", "http://localhost:6333")
-qdrant_client = QdrantClient(url=qdrant_url)
+qdrant_api_key = os.getenv("QDRANT_API_KEY")
+qdrant_client = QdrantClient(url=qdrant_url, api_key=qdrant_api_key)
 collection_name = "demo_collection"
 try:
     existing_collections = qdrant_client.get_collections().collections
