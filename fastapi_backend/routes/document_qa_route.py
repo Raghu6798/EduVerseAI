@@ -91,7 +91,7 @@ try:
     if collection_name not in collection_names:
         qdrant_client.create_collection(
             collection_name=collection_name,
-            vectors_config=VectorParams(size=768, distance=Distance.COSINE),
+            vectors_config=VectorParams(size=3072, distance=Distance.COSINE),
         )
 except Exception as e:
     logger.error(f"Failed to connect to Qdrant or fetch collections: {e}")

@@ -3,8 +3,6 @@ uvicorn
 python-dotenv
 loguru
 
-# Install CPU-only torch to save space
---extra-index-url https://download.pytorch.org/whl/cpu
 
 langchain
 langchain-google-genai
