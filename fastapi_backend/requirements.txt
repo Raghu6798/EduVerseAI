@@ -18,6 +18,7 @@ mistralai
 pymupdf
 
 supabase
+python-multipart
 supabase_auth
 
 
