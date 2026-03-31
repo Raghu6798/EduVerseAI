@@ -14,7 +14,7 @@ ENV PATH="/app/.venv/bin:$PATH"
 
 # Install dependencies from requirements.txt
 COPY requirements.txt .
-RUN uv pip install --no-cache -r requirements.txt
+RUN uv pip install --no-cache --index-strategy unsafe-best-match -r requirements.txt
 
 
 # Stage 2: Runtime stage
