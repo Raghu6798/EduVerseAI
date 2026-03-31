@@ -81,19 +81,23 @@ async def get_current_user(request: Request) -> dict:
     return await get_supabase_user(supabase, jwt_token)
 
 
-# === Vector Store & LLM Setup ===
 
-qdrant_client =  QdrantClient(host="localhost", port=6333)
+qdrant_url = os.getenv("QDRANT_URL", "http://localhost:6333")
+qdrant_client = QdrantClient(url=qdrant_url)
 collection_name = "demo_collection"
-existing_collections = qdrant_client.get_collections().collections
-existing_names = [col.name for col in existing_collections]
-if collection_name not in existing_names:
-    qdrant_client.create_collection(
-        collection_name=collection_name,
-        vectors_config=VectorParams(size=384, distance=Distance.COSINE),
-    )
+try:
+    existing_collections = qdrant_client.get_collections().collections
+    collection_names = [collection.name for collection in existing_collections]
+    if "Eduverse_docs" not in collection_names:
+        qdrant_client.create_collection(
+            collection_name="Eduverse_docs",
+            vectors_config=VectorParams(size=768, distance=Distance.COSINE),
+        )
+except Exception as e:
+    logger.error(f"Failed to connect to Qdrant or fetch collections: {e}")
 else:
     print(f"Collection '{collection_name}' already exists.")
+    
 vector_store = QdrantVectorStore(
     client=qdrant_client,
     collection_name="demo_collection",
