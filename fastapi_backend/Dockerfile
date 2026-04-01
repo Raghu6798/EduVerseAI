@@ -34,5 +34,5 @@ COPY --from=builder /app/.venv /app/.venv
 COPY . /app
 
 # Expose port and start the application
-EXPOSE 8000
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+EXPOSE 8001
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8001"]

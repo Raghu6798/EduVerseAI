@@ -8,13 +8,11 @@ from routes.video_qa_route import video_router
 
 app = FastAPI()
 
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173",
         "https://eduverse.cortexruntime.info",
-       
     ],
     allow_origin_regex = r"https://(?:.*\.)?cortexruntime\.info",
     allow_credentials=True,
@@ -30,4 +28,4 @@ app.include_router(video_router)
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8001, reload=True)
