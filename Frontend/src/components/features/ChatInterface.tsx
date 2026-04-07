@@ -182,7 +182,7 @@ export const ChatInterface = ({ mode }: { mode: string }) => {
     try {
       const token = supabaseSession?.access_token
 
-      const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}api/v1/upload`, formData, {
+      const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/v1/upload`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${token}`,
@@ -240,7 +240,7 @@ export const ChatInterface = ({ mode }: { mode: string }) => {
       const token = supabaseSession?.access_token
 
       const response = await axios.post(
-        `${import.meta.env.VITE_API_BASE_URL}api/v1/query`,
+        `${import.meta.env.VITE_API_BASE_URL}/api/v1/query`,
         {
           question: input,
           document_id: documentId,
@@ -314,7 +314,7 @@ export const ChatInterface = ({ mode }: { mode: string }) => {
       const token = supabaseSession?.access_token
       const formData = new FormData()
       formData.append("file", imageFile)
-      const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}image-qa/upload`, formData, {
+      const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/image-qa/upload`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${token}`,
@@ -338,7 +338,7 @@ export const ChatInterface = ({ mode }: { mode: string }) => {
     try {
       const token = supabaseSession?.access_token
       const res = await axios.post(
-        `${import.meta.env.VITE_API_BASE_URL}image-qa/ask`,
+        `${import.meta.env.VITE_API_BASE_URL}/image-qa/ask`,
         {
           image_id: imageId,
           question: imageQuestion,
@@ -383,7 +383,7 @@ export const ChatInterface = ({ mode }: { mode: string }) => {
       const formData = new FormData()
       formData.append("file", videoFile)
 
-      const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}video-qa/upload-video`, formData, {
+      const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/video-qa/upload-video`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${token}`,
@@ -413,7 +413,7 @@ export const ChatInterface = ({ mode }: { mode: string }) => {
 
     try {
       const token = supabaseSession?.access_token
-      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}video-qa/process-youtube`, {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/video-qa/process-youtube`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
