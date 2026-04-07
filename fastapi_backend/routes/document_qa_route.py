@@ -214,6 +214,7 @@ async def ask_question(request: DocumentQARequest, user=Depends(get_current_user
             history_messages_key="chat_history",
         )
 
+        logger.info(f"Invoking chat with history for user {user.id} and session.")
         response = chat_with_history.invoke(
             {
                 "question": request.question,

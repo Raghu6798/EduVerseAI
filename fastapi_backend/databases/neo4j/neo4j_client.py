@@ -8,18 +8,26 @@ load_dotenv()
 logger.remove()
 logger.add(sys.stderr, level="DEBUG", format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>", serialize=True)
 
+# Get Neo4j connection info
+neo4j_uri = os.getenv("NEO4J_URI") or os.getenv("NEO4J_URL")
+neo4j_user = os.getenv("NEO4J_USER")
+neo4j_pass = os.getenv("NEO4J_PASSWORD")
+
+logger.info(f"Connecting to Neo4j at: {neo4j_uri} as user: {neo4j_user}")
+
 try:
     graph = Neo4jGraph(
-        url=os.getenv("NEO4J_URI"),
-        username=os.getenv("NEO4J_USER"),
-        password=os.getenv("NEO4J_PASSWORD"),
+        url=neo4j_uri,
+        username=neo4j_user,
+        password=neo4j_pass,
         refresh_schema=False 
     )
+    logger.success("Successfully initialized Neo4j graph object")
 except Exception as e:
-    logger.warning(f"Failed to connect to Neo4j database: {e}")
+    logger.warning(f"Neo4j initialization failed: {e}")
     graph = Neo4jGraph(
-        url=os.getenv("NEO4J_URI"),
-        username=os.getenv("NEO4J_USER"),
-        password=os.getenv("NEO4J_PASSWORD")
+        url=neo4j_uri,
+        username=neo4j_user,
+        password=neo4j_pass
     )
 print(graph)
