@@ -182,7 +182,7 @@ export const ChatInterface = ({ mode }: { mode: string }) => {
     try {
       const token = supabaseSession?.access_token
 
-      const response = await axios.post("http://localhost:8000/api/v1/upload", formData, {
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/upload`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${token}`,
@@ -240,7 +240,7 @@ export const ChatInterface = ({ mode }: { mode: string }) => {
       const token = supabaseSession?.access_token
 
       const response = await axios.post(
-        "http://localhost:8000/api/v1/query",
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/query`,
         {
           question: input,
           document_id: documentId,
@@ -314,7 +314,7 @@ export const ChatInterface = ({ mode }: { mode: string }) => {
       const token = supabaseSession?.access_token
       const formData = new FormData()
       formData.append("file", imageFile)
-      const res = await axios.post("http://127.0.0.1:8000/image-qa/upload", formData, {
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/image-qa/upload`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${token}`,
@@ -338,7 +338,7 @@ export const ChatInterface = ({ mode }: { mode: string }) => {
     try {
       const token = supabaseSession?.access_token
       const res = await axios.post(
-        "http://127.0.0.1:8000/image-qa/ask",
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/image-qa/ask`,
         {
           image_id: imageId,
           question: imageQuestion,
@@ -383,7 +383,7 @@ export const ChatInterface = ({ mode }: { mode: string }) => {
       const formData = new FormData()
       formData.append("file", videoFile)
 
-      const res = await axios.post("http://127.0.0.1:8000/video-qa/upload-video", formData, {
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/video-qa/upload-video`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${token}`,
@@ -413,7 +413,7 @@ export const ChatInterface = ({ mode }: { mode: string }) => {
 
     try {
       const token = supabaseSession?.access_token
-      const res = await fetch("http://127.0.0.1:8000/video-qa/process-youtube", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/video-qa/process-youtube`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
