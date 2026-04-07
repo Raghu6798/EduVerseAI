@@ -10,16 +10,15 @@ logger.add(sys.stderr, level="DEBUG", format="<green>{time:YYYY-MM-DD HH:mm:ss}<
 
 try:
     graph = Neo4jGraph(
-        url=os.getenv("NEO4J_URL"),
+        url=os.getenv("NEO4J_URI"),
         username=os.getenv("NEO4J_USER"),
         password=os.getenv("NEO4J_PASSWORD"),
-        database="neo4j",
         refresh_schema=False 
     )
 except Exception as e:
-    logger.warning(f"Failed to connect to default 'neo4j' database, trying discovery: {e}")
+    logger.warning(f"Failed to connect to Neo4j database: {e}")
     graph = Neo4jGraph(
-        url=os.getenv("NEO4J_URL"),
+        url=os.getenv("NEO4J_URI"),
         username=os.getenv("NEO4J_USER"),
         password=os.getenv("NEO4J_PASSWORD")
     )
