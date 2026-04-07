@@ -1,12 +1,12 @@
 from fastapi import FastAPI, Request, Response
-from fastapi.responses import StreamingResponse, ORJSONResponse
+from fastapi.responses import StreamingResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
 from routes.document_qa_route import document_router
 from routes.visual_qa_route import image_router
 from routes.video_qa_route import video_router
 
-app = FastAPI(default_response_class=ORJSONResponse)
+app = FastAPI()
 
 
 BLOCKED_PATTERNS = [".env", ".git", "phpinfo", ".php", "wp-login", "laravel", "xampp"]
@@ -15,7 +15,7 @@ BLOCKED_PATTERNS = [".env", ".git", "phpinfo", ".php", "wp-login", "laravel", "x
 async def block_scanners(request: Request, call_next):
     path = request.url.path.lower()
     if any(pattern in path for pattern in BLOCKED_PATTERNS):
-        return ORJSONResponse(
+        return JSONResponse(
             status_code=403,
             content={"detail": "Access forbidden: security scan detected."}
         )
