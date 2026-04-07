@@ -194,7 +194,7 @@ async def ask_question(request: DocumentQARequest, user=Depends(get_current_user
 
         # Helper to get chat history for the session
         def get_session_history(session_id: str) -> Neo4jChatMessageHistory:
-            return Neo4jChatMessageHistory(session_id=session_id, graph=graph)
+            return Neo4jChatMessageHistory(session_id=session_id, graph=graph, database=None)
 
         # Define prompt template for chat model
         prompt = ChatPromptTemplate.from_messages([

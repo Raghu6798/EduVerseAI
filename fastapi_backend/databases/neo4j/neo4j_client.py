@@ -20,6 +20,7 @@ try:
         url=neo4j_uri,
         username=neo4j_user,
         password=neo4j_pass,
+        database=None,
         refresh_schema=False 
     )
     logger.success("Successfully initialized Neo4j graph object")
